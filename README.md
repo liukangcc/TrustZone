@@ -9,14 +9,14 @@ ARM TrustZone® 技术是系统范围的安全方法，针对高性能计算平�
 STM32U5 是一颗主打低功耗和安全应用的 MCU，它的安全特性，从各个方面都比以往的 STM32 系列有了进一步提高。
 
 - 它支持安全启动，这是信任链的可靠锚点：bootlock 可以保证启动的唯一入口，HDP 可以将用户闪存的一部分隐藏起来，通常是复位后运行的安全启动代码，使得其对后面的用户应用程序不可见。
-- 为了支持 CM33 内核里的 trustzone 安全扩展，L5 上的外设模块、存储模块都做了升级来配合 trustzone 机制
-- 为了实现对软件和数据的保护，L5 新增了配合 trustzone 的安全调试功能，可以限制用户仅能调试非安全世界代码，而无法调试安全世界的代码。另外，L5 还有一个 OTFDEC 模块，可以对存储在芯片外 Ocot-SPI flash 上的密文数据或者密文代码，on the fly 地解密执行和解密读取，从而解放了片上闪存空间对用户代码的限制，同时还能保证用户代码的机密性。
+- 为了支持 CM33 内核里的 trustzone 安全扩展，U5 上的外设模块、存储模块都做了升级来配合 trustzone 机制
+- 为了实现对软件和数据的保护，U5 新增了配合 trustzone 的安全调试功能，可以限制用户仅能调试非安全世界代码，而无法调试安全世界的代码。另外，U5 还有一个 OTFDEC 模块，可以对存储在芯片外 Ocot-SPI flash 上的密文数据或者密文代码，on the fly 地解密执行和解密读取，从而解放了片上闪存空间对用户代码的限制，同时还能保证用户代码的机密性。
 
-![image-20220222161810814](C:\Users\LiuKang\AppData\Roaming\Typora\typora-user-images\image-20220222161810814.png)
+![image-20220222161810814](figures/image-20220222161810814.png)
 
-TrustZone的基本原则，就是把应用中的关键操作代码，和其他应用程序隔离开来，避免恶意应用程序的攻击，或者由于应用程序本身的设计漏洞，对敏感操作代码的攻击。
+**TrustZone的基本原则，就是把应用中的关键操作代码，和其他应用程序隔离开来，避免恶意应用程序的攻击，或者由于应用程序本身的设计漏洞，对敏感操作代码的攻击**。
 
-![image-20220222161948734](C:\Users\LiuKang\AppData\Roaming\Typora\typora-user-images\image-20220222161948734.png)
+![image-20220222161948734](figures/image-20220222161948734.png)
 
 ## 特点和优势
 
@@ -32,21 +32,19 @@ TrustZone的基本原则，就是把应用中的关键操作代码，和其他�
 
   开发人员可以使用熟悉的语言创建 TrustZone 系统，同时保持现有程序员的模型。此外，TrustZone 还由 RTOS、编译器、调试和跟踪解决方案组成的综合生态系统提供支持。
 
-## 名词解释
+## 系统启动
 
-### CMSE
+当芯片上电后，从上电到执行第一个非安全世界应用时，芯片内的处理流程：
 
-The Cortex-M Security Extensions(CMSE) 是对安全扩展（架构内在函数和选项）的编译器支持，并且是 Arm C 语言 (ACLE) 规范的一部分。
 
-开发在安全状态下运行的软件时需要 CMSE 功能。这提供了定义安全入口点的机制，并使工具链能够在程序映像中生成正确的指令或支持功能。
 
-使用各种属性和内在函数访问 CMSE 功能。附加的宏也被定义为 CMSE 的一部分。
+## 架构设计
 
 ### GTZC
 
 Global TrustZone Controller (GTZC)：全局 TZ 控制器，由三个子模块组成：
 
-![image-20220222151331943](C:\Users\LiuKang\AppData\Roaming\Typora\typora-user-images\image-20220222151331943.png)
+![image-20220222151331943](figures/image-20220222151331943.png)
 
 - TZSC: TrustZone security controller
 
@@ -60,9 +58,50 @@ Global TrustZone Controller (GTZC)：全局 TZ 控制器，由三个子模块组
 
   此子模块收集系统中的所有非法访问事件，并生成安全中断到 NVIC 。
 
-## 架构设计
+### 状态切换
+
+- 从安全世界切换到非安全世界
+- 从非安全世界切换到安全世界
+
+![image-20220222181146470](figures/image-20220222181146470.png)
+
+### 汇编指令
+
+- SG:
+- BXNS:
+- BLXNS:
 
 ## 软件设计
+
+### CMSE
+
+The Cortex-M Security Extensions(CMSE) 是对安全扩展（架构内在函数和选项）的编译器支持，并且是 Arm C 语言 (ACLE) 规范的一部分。
+
+开发在安全状态下运行的软件时需要 CMSE 功能。这提供了定义安全入口点的机制，并使工具链能够在程序映像中生成正确的指令或支持功能。
+
+使用各种属性和内在函数访问 CMSE 功能。附加的宏也被定义为 CMSE 的一部分。
+
+## 外设隔离
+
+### GPIO 
+
+### UART
+
+## 存储隔离
+
+### SRAM
+
+### FLASH
+
+### 外部存储
+
+## 系统模块
+
+### Clock
+
+### PWR
+
+### EXIT
 
 ## 参考例程
 
@@ -70,7 +109,7 @@ Global TrustZone Controller (GTZC)：全局 TZ 控制器，由三个子模块组
 
 ### RT-Thread 版
 
-![image-20220222165204893](C:\Users\LiuKang\AppData\Roaming\Typora\typora-user-images\image-20220222165204893.png)
+![image-20220222165204893](figures/image-20220222165204893.png)
 
 ## 参考链接
 
